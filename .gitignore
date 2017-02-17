@@ -1,0 +1,8 @@
+*.DS_Store*
+
+# Don't upload the model files
+*.npy
+*.ckpt
+
+# Don't upload the models since they're probably (or likely should be) repos of their own
+the-nature-conservancy-fisheries-monitoring/src/trainable_models/tensorflow_vgg

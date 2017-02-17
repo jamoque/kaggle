@@ -1,0 +1,2 @@
+Beginning Training
+Step 0: loss = 0.0330695152283 (49.8238239288 sec)
