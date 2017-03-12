@@ -8,7 +8,7 @@ from collections import OrderedDict
 learning_rate = 1e-4
 
 # maximum number of steps to run during training
-max_steps = 8000
+max_steps = 1000000000
 
 # batch size (https://arxiv.org/pdf/1502.03167v3.pdf)
 batch_size = 30
@@ -31,6 +31,9 @@ num_labels = 109;
 
 # relative path to the directory where data files are stored
 data_path = '../data/'
+
+# directory where checkpoints for trained models are saves
+train_dir = 'trained_models'
 
 # path to labeled training data
 training_label_file_path = data_path + 'train_images.txt'

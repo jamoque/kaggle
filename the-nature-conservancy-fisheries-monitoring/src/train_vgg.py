@@ -14,7 +14,8 @@ import time, os
 import config
 
 
-def eval(sess, eval, data_size, images, labels, image_batch, label_batch):
+def evaluate(sess, evaluator, data_size, images, labels, train_mode,
+         image_batch, label_batch):
     """
     Runs an evaluation against a full epoch of data
     """
@@ -24,7 +25,7 @@ def eval(sess, eval, data_size, images, labels, image_batch, label_batch):
 
     for step in xrange(steps_per_epoch):
         np_images, np_labels = sess.run([image_batch, label_batch])
-        num_correct += sess.run(eval, feed_dict={
+        num_correct += sess.run(evaluator, feed_dict={
                 images: np_images,
                 labels: np_labels,
                 train_mode: False
@@ -51,7 +52,10 @@ def make_batches(label_file, batch_size, num_epochs):
     image, label = read_images_from_disk(input_queue)
     image = tf.image.convert_image_dtype(image, tf.float32)
     shape = None
-    image = tf.image.resize_images(image, [224, 224])
+    try:
+        image = tf.image.resize_images(image, [224, 224])
+    except:
+        image = tf.image.resize_images(image, 224, 224)
     shape = (224, 224, 3)
 
     image_batch, label_batch = tf.train.batch(
@@ -75,6 +79,7 @@ def read_labeled_image_list(image_list_file):
         filename = config.data_path + filename
         filenames.append(filename)
         labels.append(config.label_to_int(label))
+    f.close()
 
     return filenames, labels
 
@@ -97,14 +102,14 @@ def log(msg, logfile=None):
 
 
 # NOTE: For full description of model parameters, see config.py
-logfile = "../out/{}.lr.{}.eps.{}.dr.{}.reg.{}.txt".format(
+param_string = "../out/{}.lr.{}.eps.{}.dr.{}.reg.{}.txt".format(
     time.strftime("%m.%d.%Y.%H.%M"),
     config.learning_rate,
     config.epsilon,
     config.dropout,
     config.reg
 )
-logfile = open(logfile, 'a')
+logfile = open(param_string, 'a')
 
 # create mini-batches for training set and test set
 # batch info: https://arxiv.org/pdf/1502.03167v3.pdf
@@ -143,8 +148,8 @@ sess = tf.Session()
 logits = vgg.fc8
 labels = tf.to_int64(labels_)
 cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-    logits,
-    labels,
+    logits=logits,
+    labels=labels,
     name='xentropy'
 )
 
@@ -215,36 +220,34 @@ for step in xrange(config.max_steps):
 
         # Evaluate against the training set
         log('Training Data Eval:', logfile)
-        eval(
-            sess,
-            eval_comparison,
-            train_batch_size, 
-            images_,
-            labels_, 
-            train_image_batch,
-            train_label_batch
+        evaluate(
+            sess=sess,
+            evaluator=eval_comparison,
+            data_size=train_batch_size,
+            images=images_,
+            labels=labels_,
+            train_mode=train_mode_,
+            image_batch=train_image_batch,
+            label_batch=train_label_batch,
         )
 
         # Evaluate against the validation set.
         log('Validation Data Eval:', logfile)
-        eval(
-            sess,
-            eval_comparison,
-            test_batch_size, 
-            images_,
-            labels_, 
-            test_image_batch,
-            test_label_batch
+        evaluate(
+            sess=sess,
+            evaluator=eval_comparison,
+            data_size=test_batch_size,
+            images=images_,
+            labels=labels_,
+            train_mode=train_mode_,
+            image_batch=test_image_batch,
+            label_batch=test_label_batch
         )
         
         # Save the checkpoint file
-        vgg.save_npy(sess, './trained_models/myVGG.%s.step.%d.npy' % (
-            paramString, step))
+        vgg.save_npy(sess, 'trained-step-{}.npy').format(step)
 
         log('\n', logfile)
 
-
 # vgg.save_npy() save the model
-vgg.save_npy(sess, './trained_models/myVGG.%s.npy' % (paramString))
-
-
+vgg.save_npy(sess, 'trained-step-{}.npy').format(step)
