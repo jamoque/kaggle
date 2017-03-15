@@ -4,7 +4,7 @@ from src.util import *
 
 
 def evaluate_predictions(Predictor):
-    test_list = list_files(False, True)
+    test_list = list_files(labeled_train=False, labeled_test=True)
     predictor = Predictor()
 
     num_guesses = 0.0
@@ -23,6 +23,14 @@ def evaluate_predictions(Predictor):
     
     print "------\nACCURACY: {}\n------".format(num_correct / num_guesses)
 
+def ouput_validation_likelihoods(Predictor):
+    test_list = list_files(False, False, True)
+    predictor = Predictor()
+
+    for image_name in test_list:
+        image_path = path.join(DATA_PATH, image_name)
+        _ = predictor.predict(image_path, for_submission=True)
+
 def print_stats(guess, ground_truth, num_guesses, num_correct):
     print "{}\tGuess: {}\t\tActual: {}".format(
         int(num_guesses),
@@ -33,7 +41,7 @@ def print_stats(guess, ground_truth, num_guesses, num_correct):
     if (num_guesses % 100 == 0):
         print '-----------------------------------------------------'
         print 'Accuracy through {} predictions: {}'.format(
-            num_guesses,
+            int(num_guesses),
             num_correct / num_guesses
         )
         print '-----------------------------------------------------'
@@ -44,7 +52,15 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser("Evaluate a model on the validation set")
-    parser.add_argument("model_dir", help="The directory the model is stored in (e.g. src).")
+    parser.add_argument(
+        "model_dir",
+        help="The directory the model is stored in (e.g. src)."
+    )
+    parser.add_argument(
+        "--submission", 
+        action="store_true",
+        help="Specify if output should be formatted for competition submission"
+    )
     args = parser.parse_args()
 
     try:
@@ -53,5 +69,8 @@ if __name__ == "__main__":
         print "Failed to load 'run.py' in '{}'".format(args.model_dir)
         exit(1)
 
-    evaluate_predictions(run.Predictor)
+    if args.submission:
+        ouput_validation_likelihoods(run.Predictor)
+    else:
+        evaluate_predictions(run.Predictor)
         
