@@ -245,9 +245,9 @@ for step in xrange(config.max_steps):
         )
         
         # Save the checkpoint file
-        vgg.save_npy(sess, 'trained-step-{}.npy').format(step)
+        vgg.save_npy(sess, 'trained-step-{}.npy'.format(step))
 
         log('\n', logfile)
 
 # vgg.save_npy() save the model
-vgg.save_npy(sess, 'trained-step-{}.npy').format(step)
+vgg.save_npy(sess, 'trained-step-{}.npy'.format(step))

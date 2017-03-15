@@ -42,23 +42,34 @@ training_label_file_path = data_path + 'train_images.txt'
 test_labels_file_path = data_path + 'test_images.txt'
 
 _mapping = OrderedDict({
-	'ALB': 0,
-	'BET': 1,
-	'DOL': 2,
-	'LAG': 3,
-	'NoF': 4,
-	'OTHER': 5,
-	'SHARK': 6,
-	'YFT': 7
+    'ALB': 0,
+    'BET': 1,
+    'DOL': 2,
+    'LAG': 3,
+    'NoF': 4,
+    'OTHER': 5,
+    'SHARK': 6,
+    'YFT': 7
 })
+
+_reverse_mapping = [
+	'ALB',
+    'BET',
+    'DOL',
+    'LAG',
+    'NoF',
+    'OTHER',
+    'SHARK',
+    'YFT'
+]
 
 num_classes = len(_mapping.keys())
 
 def label_to_int(label):
-	return _mapping[label]
+    return _mapping[label]
 
 def int_to_label(i):
-	return _mapping.values()[i]
+    return _reverse_mapping[i]
 
 #########################
 # PROCEDURAL PARAMETERS
